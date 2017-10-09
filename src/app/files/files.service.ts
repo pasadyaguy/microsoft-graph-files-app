@@ -34,7 +34,8 @@ export class FileService {
         headers.append('Authorization', 'Bearer ' + this.auth.token);
         let opts: RequestOptions = new RequestOptions();
             opts.headers = headers;
-        return this.http.get(SvcConsts.GRAPH_ONEDRIVE_URL, opts)
+        var URL = SvcConsts.GRAPH_URL + '/me/drive/root/children';
+        return this.http.get(URL, opts)
             .do(data => console.log(JSON.stringify(data)))
             .map(this.extractData)
             .catch(this.handleError);
@@ -46,7 +47,8 @@ export class FileService {
         headers.append('Authorization', 'Bearer ' + this.auth.token);
         let opts: RequestOptions = new RequestOptions();
             opts.headers = headers;
-        return this.http.get(SvcConsts.GRAPH_FOLDER_URL, opts)
+        var URL = SvcConsts.GRAPH_URL + '/drives/' + SvcConsts.DRIVE_ID + '/root:/TicketID:/children';
+        return this.http.get(URL, opts)
             //.do(data => console.log(JSON.stringify(data)))
             .map(this.extractData)
             .catch(this.handleError);
@@ -57,7 +59,7 @@ export class FileService {
         var success: boolean = false;
         var fileName = this.renameFile(item.name);
         var client = this.getClient();
-        var URL = SvcConsts.GRAPH_UPLOAD_URL + '/TicketID/' + fileName + ':/content';
+        var URL = SvcConsts.GRAPH_URL + '/drives/' + SvcConsts.DRIVE_ID + '/root:/TicketID/' + fileName + ':/content';
         client
             .api(URL)
             .put(item, (err, res) => {
@@ -79,7 +81,7 @@ export class FileService {
         headers.append('Content-Type', 'application/json');
         let opts: RequestOptions = new RequestOptions();
             opts.headers = headers;
-        var URL = SvcConsts.GRAPH_UPLOAD_URL + '/TicketID/'+fileName+':/createUploadSession'
+        var URL = SvcConsts.GRAPH_URL + '/drives/' + SvcConsts.DRIVE_ID + '/TicketID/'+fileName+':/createUploadSession'
         return this.http.post(URL, opts)
             .map(this.extractData)
             .catch(this.handleError);
