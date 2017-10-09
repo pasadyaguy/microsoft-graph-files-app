@@ -1,0 +1,43 @@
+<h1>Welcome to the Files Component!</h1>
+
+
+<div>
+    <span>Your USER access token is</span>    
+    <input style="width:500px" id='token' [value]='accessToken'/>
+</div>
+<div>
+    <span>Your APP access token is</span>
+    <input style="width:500px" id='apptoken' [value]='appAccessToken'/>
+
+</div>
+<div>
+    <br />
+    <input type="file" id='fileUpload' (click)="clearSuccess()">
+    <button id='btnUpload' (click)="uploadFiles()">Upload</button>
+    <button id='refesh' (click)="getDocuments()">Refresh Data</button>
+    <br />
+</div>
+<div id='SuccessBanner' style="border: 1px solid green; background-color: green;" hidden>
+    <span>File Uploaded Successfully!</span>
+</div>
+
+
+<table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Size</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor='let file of files'>
+                <td style="text-align:center;">
+                    <span *ngIf="file.file">File</span>
+                    <span *ngIf="!file.file">Folder</span>
+                </td>
+                <td style="text-align:center;"><a href='{{file.webUrl}}'>{{file.name}}</a></td>
+                <td style="text-align:center;">{{file.size}}</td>
+            </tr>
+        </tbody>
+    </table>
