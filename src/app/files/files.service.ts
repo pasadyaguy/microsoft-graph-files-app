@@ -6,28 +6,24 @@ import 'rxjs/add/operator/map';
 import 'rxjs/Rx';
 
 import { AuthHelper } from "../auth/authhelper.service";
+import { SvcConsts } from '../auth/svcConsts';
 
 
 @Injectable()
 export class FileService {
-    private graphOneDriveURL: string = 'https://graph.microsoft.com/v1.0/me/drive/root/children';
-    private graphSiteURL: string = 'https://graph.microsoft.com/v1.0/drives/b!eC-nM_sR10Smhb6zJNbaFc3nK5PMYddAr9c_7w7MhFrpm_XRLZNBTZ30pyiSxkDI/root/children';
-    private graphSiteURL2: string = 'https://graph.microsoft.com/v1.0/drives/b!eC-nM_sR10Smhb6zJNbaFc3nK5PMYddAr9c_7w7MhFpF1sjg7ETcRrY-cndlAQ8l/root/children';
-    private graphUploadURL: string = 'https://graph.microsoft.com/v1.0/drives/b!eC-nM_sR10Smhb6zJNbaFc3nK5PMYddAr9c_7w7MhFpF1sjg7ETcRrY-cndlAQ8l/root:';
-    private graphFolderURL: string = 'https://graph.microsoft.com/v1.0/drives/b!eC-nM_sR10Smhb6zJNbaFc3nK5PMYddAr9c_7w7MhFpF1sjg7ETcRrY-cndlAQ8l/root:/TicketID:/children';
+    
     private errorMsg: any;
-    private authHelper: AuthHelper;
 
 
     constructor(
-        private http:Http, auth:AuthHelper) {
-            this.authHelper = auth;
+        private http:Http, 
+        private auth:AuthHelper ) {
     }
 
     getClient(): MicrosoftGraphClient.Client {
         var client = MicrosoftGraphClient.Client.init({
             authProvider: (done) => {
-                done(null, this.authHelper.token);
+                done(null, this.auth.token);
             }
         });
         return client;
@@ -35,10 +31,10 @@ export class FileService {
 
     getOneDriveFiles(): Observable<any> {
         var headers = new Headers();
-        headers.append('Authorization', 'Bearer ' + this.authHelper.token);
+        headers.append('Authorization', 'Bearer ' + this.auth.token);
         let opts: RequestOptions = new RequestOptions();
             opts.headers = headers;
-        return this.http.get(this.graphOneDriveURL, opts)
+        return this.http.get(SvcConsts.GRAPH_ONEDRIVE_URL, opts)
             .do(data => console.log(JSON.stringify(data)))
             .map(this.extractData)
             .catch(this.handleError);
@@ -47,10 +43,10 @@ export class FileService {
 
     getSharePointFiles(): Observable<any> {
         var headers = new Headers();
-        headers.append('Authorization', 'Bearer ' + this.authHelper.token);
+        headers.append('Authorization', 'Bearer ' + this.auth.token);
         let opts: RequestOptions = new RequestOptions();
             opts.headers = headers;
-        return this.http.get(this.graphFolderURL, opts)
+        return this.http.get(SvcConsts.GRAPH_FOLDER_URL, opts)
             //.do(data => console.log(JSON.stringify(data)))
             .map(this.extractData)
             .catch(this.handleError);
@@ -61,8 +57,9 @@ export class FileService {
         var success: boolean = false;
         var fileName = this.renameFile(item.name);
         var client = this.getClient();
+        var URL = SvcConsts.GRAPH_UPLOAD_URL + '/TicketID/' + fileName + ':/content';
         client
-            .api('https://graph.microsoft.com/v1.0/drives/b!eC-nM_sR10Smhb6zJNbaFc3nK5PMYddAr9c_7w7MhFpF1sjg7ETcRrY-cndlAQ8l/root:/TicketID/'+fileName+':/content')
+            .api(URL)
             .put(item, (err, res) => {
                 if (err) {
                     console.log(err);
@@ -72,15 +69,17 @@ export class FileService {
             });
     }
 
+
+    // Create Upload Session is still a work in progress and does not function correct at the moment.....
     createUploadSession(): Observable<any> {
         var fileInput = <HTMLInputElement>document.getElementById("fileUpload");
         var fileName = this.renameFile(fileInput.files[0].name);
         var headers = new Headers();
-        headers.append('Authorization', 'Bearer ' + this.authHelper.token);
+        headers.append('Authorization', 'Bearer ' + this.auth.token);
         headers.append('Content-Type', 'application/json');
         let opts: RequestOptions = new RequestOptions();
             opts.headers = headers;
-        var URL = this.graphUploadURL + '/TicketID/'+fileName+':/createUploadSession'
+        var URL = SvcConsts.GRAPH_UPLOAD_URL + '/TicketID/'+fileName+':/createUploadSession'
         return this.http.post(URL, opts)
             .map(this.extractData)
             .catch(this.handleError);

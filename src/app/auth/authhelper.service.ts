@@ -18,7 +18,6 @@ export class AuthHelper {
 	public access_token:string = null;
 	public app_access_token: string = null;
 	public token: string = null;
-	private AppTokenURL: string = 'https://login.microsoftonline.com/tampageneral.onmicrosoft.com/oauth2/token';
 	
 	constructor(private http:Http) {
 		//check for id_token or access_token in url
@@ -59,7 +58,7 @@ export class AuthHelper {
 		"&resource=https://graph.microsoft.com" +
 		"&client_secret=" + SvcConsts.APP_SECRET +
 		"&grant_type=client_credentials"
-		var URL = this.AppTokenURL
+		var URL = SvcConsts.APP_TOKEN_URL;
         return this.http.post(URL, body, opts)
             .do((res: Response) => {this.app_access_token = res.json().access_token, this.token = this.app_access_token})			
             .map((response: Response) => response.json())
