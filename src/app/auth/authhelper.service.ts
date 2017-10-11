@@ -44,23 +44,26 @@ export class AuthHelper {
 		window.location.href = "https://login.microsoftonline.com/" + SvcConsts.TENANT_ID + 
 			"/oauth2/authorize?response_type=token&client_id=" + SvcConsts.CLIENT_ID + 
 			"&resource=" + SvcConsts.GRAPH_RESOURCE + 
-			"&redirect_uri=" + encodeURIComponent(window.location.href) + 
+			"&redirect_uri=" + encodeURIComponent(window.location.origin) + 
 			"&prompt=none&state=SomeState&nonce=SomeNonce";
 	}
 
 	public getAppAccessToken(): Observable<any> {
 		var headers = new Headers();
 		headers.append('Content-Type', 'application/x-www-form-urlencoded');
-
         let opts: RequestOptions = new RequestOptions();
 			opts.headers = headers;
 		var body = "client_id=" + SvcConsts.CLIENT_ID +
-		"&resource=https://graph.microsoft.com" +
+		"&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default" +
 		"&client_secret=" + SvcConsts.APP_SECRET +
 		"&grant_type=client_credentials"
-		var URL = SvcConsts.APP_TOKEN_URL;
+		//var URL = SvcConsts.APP_TOKEN_URL;
+		var URL = 'https://login.microsoftonline.com/tampageneral.onmicrosoft.com/oauth2/v2.0/token'
         return this.http.post(URL, body, opts)
-            .do((res: Response) => {this.app_access_token = res.json().access_token, this.token = this.app_access_token})			
+            .do((res: Response) => {
+				this.app_access_token = res.json().access_token, 
+				this.token = this.app_access_token
+			})			
             .map((response: Response) => response.json())
             .catch(this.handleError);
 	}

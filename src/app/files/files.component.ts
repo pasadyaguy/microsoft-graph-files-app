@@ -18,6 +18,7 @@ export class FilesComponent implements OnInit {
   private UploadSuccess: boolean = false;
   accessToken: string;
   appAccessToken: string;
+  public loading = false;
 
   constructor(http:Http,private auth:AuthHelper, private _fileService: FileService) {
     if(auth.access_token !== null) {
@@ -37,26 +38,45 @@ export class FilesComponent implements OnInit {
   }
 
   getDocuments(): void {
+    this.loading = true;
+    this.clearSuccess();
     this._fileService.getSharePointFiles()
     .subscribe(data => {
+      this.loading = false;
       this.files = data,
       document.getElementById('SuccessBanner').hidden = true;
     },
       //file => this.files = file,
-      error => this.errorMsg = <any>error);
+      error => {
+        this.loading = false;
+        this.errorMsg = <any>error});
   }
 
   uploadFiles(): void {
     var fileInput = <HTMLInputElement>document.getElementById("fileUpload");
-    this._fileService.upload(fileInput);
+    this._fileService.upload(fileInput)
+
     //this._fileService.createUploadSession()
     //.subscribe(
     //  data => console.log(data)
     //)
   }
 
+  createUploadSession() {
+    
+    var fileInput = <HTMLInputElement>document.getElementById("fileUpload");
+    this._fileService.UploadViaSession(fileInput);
+    //debugger
+    //this._fileService.createUploadSession(fileInput)
+    //  .subscribe(
+    //    res => console.log(res),
+    //    error => console.log(JSON.stringify(error))
+    //  )
+  }
+
   clearSuccess(): void {
     document.getElementById('SuccessBanner').hidden = true;
+    document.getElementById('FailBanner').hidden = true;
   }
     
 
