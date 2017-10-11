@@ -45,11 +45,18 @@ export class FileService {
     }
 
     getSharePointFiles(): Observable<any> {
+        var folderInput = <HTMLInputElement>document.getElementById('folderName');
+        var folderPath = folderInput.value;
+        if (folderPath == '' || folderPath == null) {
+            folderPath = ''; 
+        } else {
+            folderPath = ':/' + folderPath + ':'
+        }
         var headers = new Headers();
         headers.append('Authorization', 'Bearer ' + this.auth.token);
         let opts: RequestOptions = new RequestOptions();
             opts.headers = headers;
-        var URL = SvcConsts.GRAPH_URL + '/drives/' + SvcConsts.DRIVE_ID + '/root:/TicketID:/children';
+        var URL = SvcConsts.GRAPH_URL + '/drives/' + SvcConsts.DRIVE_ID + '/root'+folderPath+'/children';
         return this.http.get(URL, opts)
             //.do(data => console.log(JSON.stringify(data)))
             .map(this.extractData)
@@ -83,7 +90,7 @@ export class FileService {
     public UploadViaSession(fileInput: HTMLInputElement) {
         var file = fileInput.files[0];
         var size = file.size;
-        var sliceSize = 40 * 320 * 320;
+        var sliceSize = 320 * 187500;
         var start = 0;
         var session: any;
         //debugger
@@ -100,11 +107,18 @@ export class FileService {
     }
 
     private CreateSession(fileName: string): Observable<any> {
+        var folderInput = <HTMLInputElement>document.getElementById('folderName');
+        var folderPath = folderInput.value;
+        if (folderPath == '' || folderPath == null) {
+            folderPath = '/'; 
+        } else {
+            folderPath = ':/' + folderPath + '/'
+        }
         var body = '';
         var headers = new Headers();
         headers.append('Authorization', this.auth.token);
         headers.append('Content-Type', 'application/json');
-        var url = SvcConsts.GRAPH_URL + '/drives/' + SvcConsts.DRIVE_ID + '/root:/TicketID/' + fileName + ':/createUploadSession';
+        var url = SvcConsts.GRAPH_URL + '/drives/' + SvcConsts.DRIVE_ID + '/root' + folderPath + fileName + ':/createUploadSession';
         return this.http.post(url, body, { headers })
             .map(this.ExtractSessionResponse)
             .catch(this.handleError)
@@ -133,7 +147,7 @@ export class FileService {
                     //debugger
                     console.log(res);
                     if (this.CheckEndOfFile(end, size, sliceSize, file, start, session)) {
-                        alert('Success');
+                        document.getElementById('SuccessBanner').hidden = false;
                     } else {
                         console.log('Getting Next Chunk...');
                     }
