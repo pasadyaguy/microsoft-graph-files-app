@@ -14,11 +14,11 @@ import { FilesComponent } from './files.component'
 @Injectable()
 export class FileService {
     
-    private errorMsg: any;    
+    private errorMsg: any; 
 
     constructor(
         private http:Http, 
-        private auth:AuthHelper ) {
+        private auth:AuthHelper) {
         
     }
 
@@ -65,11 +65,17 @@ export class FileService {
 
     upload(file: HTMLInputElement) {
         var item = file.files[0];
-        var success: boolean = false;
+        var folderInput = <HTMLInputElement>document.getElementById('folderName');
+        var folderPath = folderInput.value;
+        if (folderPath == '' || folderPath == null) {
+            folderPath = '/'; 
+        } else {
+            folderPath = ':/' + folderPath + '/'
+        }
         var fileName = item.name;
         var client = this.getClient();
         var returnValue: any;
-        var URL = SvcConsts.GRAPH_URL + '/drives/' + SvcConsts.DRIVE_ID + '/root:/TicketID/' + fileName + ':/content';
+        var URL = SvcConsts.GRAPH_URL + '/drives/' + SvcConsts.DRIVE_ID + '/root' + folderPath + fileName + ':/content';
         client
             .api(URL)
             .put(item, (err, res) => {
@@ -93,15 +99,25 @@ export class FileService {
         var sliceSize = 320 * 187500;
         var start = 0;
         var session: any;
+        let obj = {
+            'file': file,
+            'size': size,
+            'sliceSize': sliceSize,
+            'start': start
+        }
         //debugger
-        this.CreateSession(file.name)
+        return new Promise((resolve, reject) => {
+            this.CreateSession(file.name)
             .subscribe(
                 res => {
                     session = res;
-                    setTimeout(this.GetBytes(file, start, size, sliceSize, session), 1);
+                    setTimeout(this.GetBytes(obj, session), 1);
+                    resolve(res);
                 },
                 error => this.handleError
             )
+        });
+        
 
         
     }
@@ -110,7 +126,7 @@ export class FileService {
         var folderInput = <HTMLInputElement>document.getElementById('folderName');
         var folderPath = folderInput.value;
         if (folderPath == '' || folderPath == null) {
-            folderPath = '/'; 
+            folderPath = ':/'; 
         } else {
             folderPath = ':/' + folderPath + '/'
         }
@@ -125,44 +141,41 @@ export class FileService {
     }
 
     private ExtractSessionResponse(response: any) {
-        //debugger
         var body = response._body;
         let res = JSON.parse(body);
         return res;
     }
 
-    private GetBytes(file: File, start: number, size: number, sliceSize: number, session: any) {
-        //debugger        
-        var end = start + sliceSize;
+    private GetBytes(obj: any, session: any) {       
+        var end = obj.start + obj.sliceSize;
         
-        if (size - end < 0) {
-            end = size;
+        if (obj.size - end < 0) {
+            end = obj.size;
         }
 
-        var s = this.slice(file, start, end);
+        var s = this.slice(obj.file, obj.start, end);
 
-        this.SendToSession(s, start, end, file, session)
+        this.SendToSession(s, obj.start, end, obj.file, session)
             .subscribe(
                 res => {
                     //debugger
-                    console.log(res);
-                    if (this.CheckEndOfFile(end, size, sliceSize, file, start, session)) {
+                    if (this.CheckEndOfFile(end, obj, session)) {
                         document.getElementById('SuccessBanner').hidden = false;
                     } else {
-                        console.log('Getting Next Chunk...');
+                        console.log('Fetching next chunk of bytes...');
                     }
                 },
-                err => this.handleError
+                err => {this.handleError}
             )
         
            
     }
 
-    private CheckEndOfFile(end: number, size: number, sliceSize: number, file: File, start: number, session: any ): boolean {
+    private CheckEndOfFile(end: number, obj: any, session: any ): boolean {
         //debugger
-        if (end < size) {
-            start += sliceSize;
-            setTimeout(this.GetBytes(file, start, size, sliceSize, session), 1);
+        if (end < obj.size) {
+            obj.start += obj.sliceSize;
+            setTimeout(this.GetBytes(obj, session), 1);
             return false;
         }  else {
             return true;
