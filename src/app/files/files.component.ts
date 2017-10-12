@@ -66,7 +66,7 @@ export class FilesComponent implements OnInit {
     this.loading = true;
     var fileInput = <HTMLInputElement>document.getElementById("fileUpload");
     this._fileService.UploadViaSession(fileInput).then(res => {
-      console.log('hey!:' + JSON.stringify(res));
+      console.log(JSON.stringify(res));
       this.loading = false;
     });
     //debugger
