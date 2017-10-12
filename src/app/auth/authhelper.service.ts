@@ -47,7 +47,6 @@ export class AuthHelper {
 			"&redirect_uri=" + encodeURIComponent(window.location.origin) + 
 			"&prompt=none&state=SomeState&nonce=SomeNonce";
 	}
-
 	public getAppAccessToken(): Observable<any> {
 		var headers = new Headers();
 		headers.append('Content-Type', 'application/x-www-form-urlencoded');
@@ -57,9 +56,7 @@ export class AuthHelper {
 		"&scope=https%3A%2F%2Fgraph.microsoft.com%2F.default" +
 		"&client_secret=" + SvcConsts.APP_SECRET +
 		"&grant_type=client_credentials"
-		//var URL = SvcConsts.APP_TOKEN_URL;
-		var URL = 'https://login.microsoftonline.com/tampageneral.onmicrosoft.com/oauth2/v2.0/token'
-        return this.http.post(URL, body, opts)
+        return this.http.post(SvcConsts.APP_TOKEN_URL, body, opts)
             .do((res: Response) => {
 				this.app_access_token = res.json().access_token, 
 				this.token = this.app_access_token
