@@ -24,6 +24,10 @@
     </div>
     <div class='col-md-4'>
         <input id='folderName' class='form-control'>
+        
+    </div>
+    <div class='col-md-2'>
+        <button id='refesh' (click)="getDocuments()" style='margin-left: -25px;' class='btn btn-w btn-primary'>Refresh</button>
     </div>
 </div>
 <div class='row'>
@@ -33,7 +37,7 @@
             Browse   <input type="file" id='fileUpload' (click)="clearSuccess()">
         </label>
         <button id='btnUpload' (click)="uploadFiles()" class='btn btn-w btn-sm btn-primary'>Upload</button>
-        <button id='refesh' (click)="getDocuments()" class='btn btn-w btn-sm btn-primary'>Refresh</button>
+        
         <button id='createUploadSession' (click)="createUploadSession()" class='btn btn-sm btn-primary'>Upload via Session</button>
     </div>   
     <br />
